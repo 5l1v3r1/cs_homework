@@ -3,11 +3,11 @@ print("Remove comments from Python file")
 print("-------")
 
 #Input file
-f = raw_input("Insert file name or path: ")
+f = raw_input("Insert text filename: ")
 
 #Open file
 finput = open(f, "r")
-foutput = open("saida.txt", "w")
+foutput = open(f, "w")
 
 #For every line...
 for line in finput:
