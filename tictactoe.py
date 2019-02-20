@@ -1,154 +1,174 @@
 import random
 
-#Load 'random' library
+def drawBoard(board):
+    #Print out board
+    print('   |   |')
+    print(' ' + board[7] + ' | ' + board[8] + ' | ' + board[9])
+    print('   |   |')
+    print('-----------')
+    print('   |   |')
+    print(' ' + board[4] + ' | ' + board[5] + ' | ' + board[6])
+    print('   |   |')
+    print('-----------')
+    print('   |   |')
+    print(' ' + board[1] + ' | ' + board[2] + ' | ' + board[3])
+    print('   |   |')
 
-#Print starting message
-print("Welcome to Tic Tac Toe\nGame manual:\nYou play against the computer. Computer's choises are random!\nYou must give coordinates like A1 OR B3 OR C2!\nPLAY SAFE, GOOD LUCK!")
+def inputPlayerLetter():
+    #Player types which letter they want to be
+    letter = ''
+    while not (letter == 'X' or letter == 'O'):
+        print('Do you want to be X or O?')
+        letter = input().upper()
 
-##DEFINE FUNCTIONS##
-#Define portal function (check cordinates)
-def portal(f, ashenone, round):
-    if((round=="A1")or(round==0)):
-        f[0]=ashenone[1]
-        portal=True
-    elif((round=="A2")or(round==1)):
-        f[1]=ashenone[1]
-        portal=True
-    elif((round=="A3")or(round==2)):
-        f[2]=ashenone[1]
-        portal=True
-    elif((round=="B1")or(round==3)):
-        f[3]=ashenone[1]
-        portal=True
-    elif((round=="B2")or(round==4)):
-        f[4]=ashenone[1]
-        portal=True
-    elif((round=="B3")or(round==5)):
-        f[5]=ashenone[1]
-        portal=True
-    elif((round=="C1")or(round==6)):
-        f[6]=ashenone[1]
-        portal=True
-    elif((round=="C2")or(round==7)):
-        f[7]=ashenone[1]
-        portal=True
-    elif((round=="C3")or(round==8)):
-        f[8]=ashenone[1]
-        portal=True
+    if letter == 'X':
+        return ['X', 'O']
     else:
-        portal=False
-    return portal
+        return ['O', 'X']
 
-#d-and-d function for command-line graphics
-def dandd(f):
-    print("",f[0],"|",f[1],"|",f[2])
-    print("",f[3],"|",f[4],"|",f[5])
-    print("",f[6],"|",f[7],"|",f[8])
+def whoGoesFirst():
+    # Randomly choose the player who goes first
+    if random.randint(0, 1) == 0:
+        return 'computer'
+    else:
+        return 'player'
 
-#Random generator/picker
-def rdlist(f, ashenone):
-    emlist=[""]
-    for i in range(8):
-        if(i==0):
-            if((emlist[0]=="") and (f[i]=="")):
-              emlist[0]=i
-            elif (f[i]==""):
-                emlist.append(i)
+def playAgain():
+    # This function returns True if the player wants to play again
+    print('Do you want to play again? (yes or no)')
+    return input().lower().startswith('y')
 
-    round=(random.choice(emlist))
-    portal(f, ashenone, round)
+def makeMove(board, letter, move):
+    board[move] = letter
 
-#Define check function
-def check(f, ashenone1, ashenone2):
-    #Check H(orizontal) lines
-    for i in range(0, 8, 3):
-        if((f[i]==f[i+1]) and (f[i]==f[i+2])):
-            if(f[i]==ashenone1[0]):
-                ashenone1[1]=ashenone1[1]+1
+def isWinner(bo, le):
+    #Check if player has won
+    return ((bo[7] == le and bo[8] == le and bo[9] == le) or # across the top
+    (bo[4] == le and bo[5] == le and bo[6] == le) or # across the middle
+    (bo[1] == le and bo[2] == le and bo[3] == le) or # across the bottom
+    (bo[7] == le and bo[4] == le and bo[1] == le) or # down the left side
+    (bo[8] == le and bo[5] == le and bo[2] == le) or # down the middle
+    (bo[9] == le and bo[6] == le and bo[3] == le) or # down the right side
+    (bo[7] == le and bo[5] == le and bo[3] == le) or # diagonal
+    (bo[9] == le and bo[5] == le and bo[1] == le)) # diagonal
+
+def getBoardCopy(board):
+    # Make a duplicate of the board list and return it the duplicate.
+    dupeBoard = []
+
+    for i in board:
+        dupeBoard.append(i)
+
+    return dupeBoard
+
+def isSpaceFree(board, move):
+    #Return true if the passed move is free
+    return board[move] == ' '
+
+def getPlayerMove(board):
+    #Have the player type in his move.
+    move = ' '
+    while move not in '1 2 3 4 5 6 7 8 9'.split() or not isSpaceFree(board, int(move)):
+        print('What is your next move? (1-9)')
+        move = input()
+    return int(move)
+
+def chooseRandomMoveFromList(board, movesList):
+    #Returns a valid move from the passed list
+    possibleMoves = []
+    for i in movesList:
+        if isSpaceFree(board, i):
+            possibleMoves.append(i)
+
+    if len(possibleMoves) != 0:
+        return random.choice(possibleMoves)
+    else:
+        return None
+
+def getComputerMove(board, computerLetter):
+    #Determine where to move and return that move.
+    if computerLetter == 'X':
+        playerLetter = 'O'
+    else:
+        playerLetter = 'X'
+
+    for i in range(1, 10):
+        copy = getBoardCopy(board)
+        if isSpaceFree(copy, i):
+            makeMove(copy, computerLetter, i)
+            if isWinner(copy, computerLetter):
+                return i
+
+    for i in range(1, 10):
+        copy = getBoardCopy(board)
+        if isSpaceFree(copy, i):
+            makeMove(copy, playerLetter, i)
+            if isWinner(copy, playerLetter):
+                return i
+
+    move = chooseRandomMoveFromList(board, [1, 3, 7, 9])
+    if move != None:
+        return move
+
+    if isSpaceFree(board, 5):
+        return 5
+
+    #Move
+    return chooseRandomMoveFromList(board, [2, 4, 6, 8])
+
+def isBoardFull(board):
+    #Return True if every space on the board has been taken
+    for i in range(1, 10):
+        if isSpaceFree(board, i):
+            return False
+    return True
+
+
+print('Welcome to Tic Tac Toe!')
+
+while True:
+    #Reset board
+    theBoard = [' '] * 10
+    playerLetter, computerLetter = inputPlayerLetter()
+    turn = whoGoesFirst()
+    print('The ' + turn + ' will go first.')
+    gameIsPlaying = True
+
+    while gameIsPlaying:
+        if turn == 'player':
+            # Player's turn.
+            drawBoard(theBoard)
+            move = getPlayerMove(theBoard)
+            makeMove(theBoard, playerLetter, move)
+
+            if isWinner(theBoard, playerLetter):
+                drawBoard(theBoard)
+                print('Hooray! You have won the game!')
+                gameIsPlaying = False
             else:
-                ashenone2[1]=ashenone2[1]+1
+                if isBoardFull(theBoard):
+                    drawBoard(theBoard)
+                    print('The game is a tie!')
+                    break
+                else:
+                    turn = 'computer'
 
-    #Check V(ertical) lines
-    for i in range(2):
-        if((f[i]==f[i+3]) and (f[i]==f[i+6])):
-            if(f[i]==ashenone1[0]):
-                ashenone1[1]=ashenone1[1]+1
-            else:
-                ashenone2[1]=ashenone2[1]+1
-
-    #First
-    if((f[0]==f[4]) and (f[0]==f[8])):
-            if(f[i]==ashenone1[0]):
-                ashenone1[1]=ashenone1[1]+1
-            else:
-                ashenone2[1]=ashenone2[1]+1
-    #Second
-    if((f[2]==f[4]) and (f[2]==f[6])):
-            if(f[i]==ashenone1[0]):
-                ashenone1[1]=ashenone1[1]+1
-            else:
-                ashenone2[1]=ashenone2[1]+1
-
-#Cells ashenone: choosen symbol & score
-round="yes"
-f=["","","","","","","","",""]
-ans=["A1","A2","A3","B1","B2","B3","C1","C2","C3"]
-
-
-flag=True
-#Play again until False
-while(flag):
-    #Run one time/allow player to choose his character (X/0)
-    flag=True
-    while(flag):
-        round=input("Player one symbol: [X or 0]: ")
-        if((round=="X") or (round=="0")):
-            ashenone1=[round, 0]
-            #computer symbol
-            if (round=="X"):
-                ashenone2=["0", 0]
-                flag=False
-            else:
-                ashenone2=["X", 0]
-                flag=False
         else:
-            round=input("Try again please.")
-            flag=True
+            # Computer's turn.
+            move = getComputerMove(theBoard, computerLetter)
+            makeMove(theBoard, computerLetter, move)
 
-    #Main part
-    flag=True
-    while(flag):
-        flag=True
-        while(flag):
-            #Check cordinates
-            round=input("Please input cordinates: ")
-            flag=portal(f, ashenone1, round)
-            if(flag):
-                flag=False
-                print("ok")
-            else:#Check cordinates
-                print("Invalid cordinates - please try again.")
-                flag=True
-            print("OK!")
-        #computer's move
-        rdlist(f, ashenone2)
-        dandd(f)
-        check(f, ashenone1, ashenone2)
-        if((ashenone1[1]==1)or(ashenone2[1]==1)):
-            flag=False
-        else:
-            flag=True
+            if isWinner(theBoard, computerLetter):
+                drawBoard(theBoard)
+                print('The computer has beaten you! You lose.')
+                gameIsPlaying = False
+            else:
+                if isBoardFull(theBoard):
+                    drawBoard(theBoard)
+                    print('The game is a tie!')
+                    break
+                else:
+                    turn = 'player'
 
-    #Print score
-    if(ashenone1[1]>ashenone2[1]):
-        print("YOU HAVE WON!\nWell done!")
-    elif(ashenone1[1]<ashenone2[1]):
-        print("YOU HAVE LOST!")
-    else:
-        print("DRAW!")
-
-    ans=input("Do you want to play again? [yes/no]: ")
-    if(ans=="no"):
-        flag=False
-    else:
-        flag=True
+    if not playAgain():
+        break
